@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-4"><i class="fas fa-search-plus me-2"></i>CVE Lookup</h4>
+                
+                <form method="POST" class="row g-3 align-items-center mb-4">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-info"><i class="fas fa-fingerprint"></i></span>
+                            <input type="text" name="cve_id" class="form-control bg-dark text-light border-secondary" 
+                                   placeholder="e.g., CVE-2023-1234" value="{{ search_id if search_id else '' }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Lookup Details
+                        </button>
+                    </div>
+                </form>
+
+                {% if result %}
+                <div class="mt-4 p-4 border border-secondary rounded bg-dark">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h3 class="text-info fw-bold mb-0">{{ result.id }}</h3>
+                        <span class="badge fs-6 {% if result.severity == 'CRITICAL' %}bg-danger{% elif result.severity == 'HIGH' %}bg-warning text-dark{% elif result.severity == 'MEDIUM' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                            {{ result.severity }} ({{ result.score }})
+                        </span>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted small">PUBLISHED</p>
+                            <p class="text-light">{{ result.published[:10] }}</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1 text-muted small">LAST MODIFIED</p>
+                            <p class="text-light">{{ result.last_modified[:10] }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-primary border-bottom border-secondary pb-2"><i class="fas fa-align-left me-2"></i>Description</h6>
+                        <p class="text-light" style="line-height: 1.6;">{{ result.description }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-primary border-bottom border-secondary pb-2"><i class="fas fa-code me-2"></i>CVSS Vector</h6>
+                        <code class="text-accent bg-black p-2 rounded d-block">{{ result.vector }}</code>
+                    </div>
+
+                    <div>
+                        <h6 class="text-primary border-bottom border-secondary pb-2"><i class="fas fa-link me-2"></i>References</h6>
+                        <div class="row">
+                            {% for ref in result.references %}
+                            <div class="col-md-6 mb-2">
+                                <a href="{{ ref.url }}" target="_blank" class="text-info text-decoration-none small d-block text-truncate">
+                                    <i class="fas fa-external-link-alt me-1 opacity-50"></i> {{ ref.url }}
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
+from datetime import datetime, timezone, timedelta
 
 load_dotenv(os.path.join(os.getcwd(), '.env'))
 
@@ -185,5 +186,115 @@ def request_tool():
                 
     return render_template('request_tool.html', results=results, url_input=url_input)
 
+@app.route('/api/notes', methods=['GET', 'POST'])
+@login_required
+def manage_notes():
+    if request.method == 'POST':
+        content = request.json.get('content', '')
+        if not content.strip():
+            return jsonify({"status": "error", "message": "Content cannot be empty"}), 400
+        
+        db.notes.insert_one({
+            "user_id": ObjectId(current_user.id),
+            "content": content,
+            "created_at": datetime.now(timezone.utc)
+        })
+        return jsonify({"status": "success"})
+    
+    notes = list(db.notes.find({"user_id": ObjectId(current_user.id)}).sort("created_at", -1))
+    
+    formatted_notes = []
+    for note in notes:
+        formatted_notes.append({
+            "_id": str(note['_id']),
+            "content": note['content'],
+            "created_at": note['created_at'].isoformat() if 'created_at' in note else None
+        })
+    return jsonify(formatted_notes)
+
+@app.route('/api/notes/<note_id>', methods=['DELETE'])
+@login_required
+def delete_note(note_id):
+    result = db.notes.delete_one({
+        "_id": ObjectId(note_id),
+        "user_id": ObjectId(current_user.id)
+    })
+    if result.deleted_count:
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error", "message": "Note not found"}), 404
+
+@app.route('/cve')
+@login_required
+def cve():
+    api_key = "5c74b437-3e7c-47bb-9311-8f8b457a16f5"
+    now = datetime.now(timezone.utc)
+    # Using 120 days to ensure we get results if 7 days is too narrow for some regions/syncs
+    # but the user asked for 7 days in their snippet. I'll stick to 7 days first.
+    start_date = (now - timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%S.000')
+    end_date = now.strftime('%Y-%m-%dT%H:%M:%S.000')
+
+    url = f"https://services.nvd.nist.gov/rest/json/cves/2.0/?pubStartDate={start_date}&pubEndDate={end_date}&resultsPerPage=10"
+    headers = {"apiKey": api_key}
+    
+    cves = []
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            vulnerabilities = data.get('vulnerabilities', [])
+            for v in vulnerabilities:
+                cve_data = v.get('cve', {})
+                cves.append({
+                    "id": cve_data.get('id'),
+                    "description": cve_data.get('descriptions', [{}])[0].get('value', 'No description'),
+                    "published": cve_data.get('published'),
+                    "severity": cve_data.get('metrics', {}).get('cvssMetricV31', [{}])[0].get('cvssData', {}).get('baseSeverity', 'N/A'),
+                    "score": cve_data.get('metrics', {}).get('cvssMetricV31', [{}])[0].get('cvssData', {}).get('baseScore', 'N/A')
+                })
+        else:
+            flash(f"NVD API Error: {response.status_code}", 'error')
+    except Exception as e:
+        flash(f"Error fetching CVEs: {str(e)}", 'error')
+        
+    return render_template('cve.html', cves=cves)
+
+@app.route('/cve/lookup', methods=['GET', 'POST'])
+@login_required
+def cve_lookup():
+    api_key = "5c74b437-3e7c-47bb-9311-8f8b457a16f5"
+    cve_id = request.form.get('cve_id') if request.method == 'POST' else request.args.get('cve_id')
+    result = None
+
+    if cve_id:
+        cve_id = cve_id.strip().upper()
+        url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}"
+        headers = {"apiKey": api_key}
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('vulnerabilities'):
+                    cve_raw = data['vulnerabilities'][0]['cve']
+                    # Parse meaningful data
+                    result = {
+                        "id": cve_raw.get('id'),
+                        "description": cve_raw.get('descriptions', [{}])[0].get('value', 'No description'),
+                        "published": cve_raw.get('published'),
+                        "last_modified": cve_raw.get('lastModified'),
+                        "severity": cve_raw.get('metrics', {}).get('cvssMetricV31', [{}])[0].get('cvssData', {}).get('baseSeverity', 'N/A'),
+                        "score": cve_raw.get('metrics', {}).get('cvssMetricV31', [{}])[0].get('cvssData', {}).get('baseScore', 'N/A'),
+                        "vector": cve_raw.get('metrics', {}).get('cvssMetricV31', [{}])[0].get('cvssData', {}).get('vectorString', 'N/A'),
+                        "references": cve_raw.get('references', [])
+                    }
+                else:
+                    flash(f"CVE ID '{cve_id}' not found.", 'error')
+            else:
+                flash(f"NVD API Error: {response.status_code}", 'error')
+        except Exception as e:
+            flash(f"Error lookup CVE: {str(e)}", 'error')
+
+    return render_template('cve_lookup.html', result=result, search_id=cve_id)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
+
