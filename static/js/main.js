@@ -25,6 +25,18 @@ function updateStats() {
                 diskText.innerText = data.disk + '%';
                 diskBar.style.width = data.disk + '%';
             }
+
+            // Update Temp
+            const tempText = document.getElementById('temp-text');
+            if (tempText) {
+                tempText.innerText = data.temp !== "N/A" ? data.temp + '°C' : "N/A";
+            }
+
+            // Update IP
+            const ipText = document.getElementById('ip-text');
+            if (ipText) {
+                ipText.innerText = data.ip;
+            }
         })
         .catch(error => console.error('Error fetching stats:', error));
 }

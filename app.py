@@ -68,14 +68,41 @@ def logout():
 def index():
     return render_template('dashboard.html')
 
+import socket
+
 @app.route('/api/stats')
 @login_required
 def get_stats():
+    # Get local IP
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        ip_addr = s.getsockname()[0]
+    except Exception:
+        ip_addr = '127.0.0.1'
+    finally:
+        s.close()
+
+    # Get CPU Temperature (Works on Raspberry Pi/Linux)
+    cpu_temp = None
+    if os.path.exists("/sys/class/thermal/thermal_zone0/temp"):
+        with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+            cpu_temp = round(int(f.read()) / 1000, 1)
+    elif hasattr(psutil, "sensors_temperatures"):
+        temps = psutil.sensors_temperatures()
+        if "cpu_thermal" in temps:
+            cpu_temp = temps["cpu_thermal"][0].current
+        elif "coretemp" in temps:
+            cpu_temp = temps["coretemp"][0].current
+
     stats = {
         "cpu": psutil.cpu_percent(interval=None),
         "ram": psutil.virtual_memory().percent,
         "disk": psutil.disk_usage('/').percent,
-        "boot_time": psutil.boot_time()
+        "boot_time": psutil.boot_time(),
+        "ip": ip_addr,
+        "temp": cpu_temp if cpu_temp else "N/A"
     }
     return jsonify(stats)
 
