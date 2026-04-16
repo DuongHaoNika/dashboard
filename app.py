@@ -1,7 +1,9 @@
 import os
 import psutil
 import requests
+import socket
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+# ... rest of imports unchanged
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -186,42 +188,31 @@ def request_tool():
                 
     return render_template('request_tool.html', results=results, url_input=url_input)
 
-@app.route('/api/notes', methods=['GET', 'POST'])
+@app.route('/api/target_check', methods=['POST'])
 @login_required
-def manage_notes():
-    if request.method == 'POST':
-        content = request.json.get('content', '')
-        if not content.strip():
-            return jsonify({"status": "error", "message": "Content cannot be empty"}), 400
+def target_check():
+    data = request.json
+    target = data.get('target')
+    port = data.get('port', 80)
+    
+    if not target:
+        return jsonify({"status": "error", "message": "Target is required"}), 400
+    
+    try:
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(2)
+        result = sock.connect_ex((target, int(port)))
+        sock.close()
         
-        db.notes.insert_one({
-            "user_id": ObjectId(current_user.id),
-            "content": content,
-            "created_at": datetime.now(timezone.utc)
+        return jsonify({
+            "status": "success",
+            "open": result == 0,
+            "target": target,
+            "port": port
         })
-        return jsonify({"status": "success"})
-    
-    notes = list(db.notes.find({"user_id": ObjectId(current_user.id)}).sort("created_at", -1))
-    
-    formatted_notes = []
-    for note in notes:
-        formatted_notes.append({
-            "_id": str(note['_id']),
-            "content": note['content'],
-            "created_at": note['created_at'].isoformat() if 'created_at' in note else None
-        })
-    return jsonify(formatted_notes)
-
-@app.route('/api/notes/<note_id>', methods=['DELETE'])
-@login_required
-def delete_note(note_id):
-    result = db.notes.delete_one({
-        "_id": ObjectId(note_id),
-        "user_id": ObjectId(current_user.id)
-    })
-    if result.deleted_count:
-        return jsonify({"status": "success"})
-    return jsonify({"status": "error", "message": "Note not found"}), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/cve')
 @login_required
