@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-4"><i class="fas fa-user-secret me-2"></i>Auth Required</h3>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label text-light small">USERNAME</label>
+                        <input type="text" name="username" class="form-control bg-dark text-light border-secondary" id="username" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label text-light small">PASSWORD</label>
+                        <input type="password" name="password" class="form-control bg-dark text-light border-secondary" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">AUTHENTICATE</button>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-3 text-muted small">
+            SYSTEM_ACCESS_ONLY
+        </div>
+    </div>
+</div>
+{% endblock %}

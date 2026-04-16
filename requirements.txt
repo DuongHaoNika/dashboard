@@ -1,0 +1,7 @@
+Flask
+pymongo
+psutil
+Flask-Login
+python-dotenv
+werkzeug
+dnspython

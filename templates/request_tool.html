@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4"><i class="fas fa-exchange-alt me-2"></i>HTTP Fetcher</h3>
+                <form method="POST" class="row g-3">
+                    <div class="col-md-10">
+                        <input type="text" name="url" class="form-control bg-dark text-light border-secondary" placeholder="Enter URL (e.g., https://google.com)" required value="{{ url_input if url_input else '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">SEND</button>
+                    </div>
+                </form>
+
+                {% if results and results.headers %}
+                <div class="mt-5">
+                    <ul class="nav nav-tabs border-secondary mb-3" id="resultTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active bg-transparent text-light border-secondary" id="headers-tab" data-bs-toggle="tab" data-bs-target="#headers" type="button" role="tab">HEADERS</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link bg-transparent text-light border-secondary" id="body-tab" data-bs-toggle="tab" data-bs-target="#body" type="button" role="tab">BODY</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="resultTabsContent">
+                        <div class="tab-pane fade show active" id="headers" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-accent">Response Headers</small>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="copyContent('raw-headers')">Copy Headers</button>
+                            </div>
+                            <div class="bg-dark p-3 rounded border border-secondary">
+                                <pre id="raw-headers" class="text-info mb-0" style="white-space: pre-wrap; font-size: 0.85rem;">{{ results.headers }}</pre>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="body" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-accent">Response Body (First 10k chars)</small>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="copyContent('raw-body')">Copy Body</button>
+                            </div>
+                            <div class="bg-dark p-3 rounded border border-secondary">
+                                <pre id="raw-body" class="text-light mb-0" style="white-space: pre-wrap; font-size: 0.85rem; max-height: 500px; overflow-y: auto;">{{ results.body }}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyContent(elementId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard');
+    });
+}
+</script>
+<style>
+.nav-tabs .nav-link.active {
+    border-bottom-color: #0b0e14 !important;
+    color: #58a6ff !important;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

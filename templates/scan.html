@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4"><i class="fas fa-search-location me-2"></i>Subdomain Scanner</h3>
+                <form method="POST" class="row g-3">
+                    <div class="col-md-10">
+                        <input type="text" name="domain" class="form-control bg-dark text-light border-secondary" placeholder="Enter root domain (e.g., google.com)" required value="{{ domain if domain else '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">SCAN</button>
+                    </div>
+                </form>
+
+                {% if results is not none %}
+                <div class="mt-5">
+                    <h5 class="text-accent mb-3">Results for: {{ domain }} ({{ results|length }} found)</h5>
+                    <div class="bg-dark p-3 rounded border border-secondary" style="max-height: 500px; overflow-y: auto;">
+                        {% if results %}
+                            <ul class="list-unstyled mb-0">
+                                {% for sub in results %}
+                                <li class="py-1 border-bottom border-secondary last-child-border-0 d-flex align-items-center justify-content-between">
+                                    <code class="text-info subdomain-item" style="cursor: pointer; flex-grow: 1;" onclick="copyToClipboard('{{ sub }}', this)" title="Click to copy">
+                                        {{ sub }}
+                                    </code>
+                                    <button class="btn btn-sm btn-link text-muted p-0 ms-2" onclick="copyToClipboard('{{ sub }}', this)">
+                                        <i class="far fa-copy"></i>
+                                    </button>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mb-0">No subdomains found or API limit reached.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text, element) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalColor = element.style.color;
+        element.style.color = '#3fb950'; // Change to accent color
+        
+        // Show a small "Copied" toast or just a temporary alert
+        console.log('Copied: ' + text);
+        
+        setTimeout(() => {
+            element.style.color = originalColor;
+        }, 1000);
+    });
+}
+</script>
+
+<style>
+.last-child-border-0:last-child {
+    border-bottom: none !important;
+}
+.subdomain-item:hover {
+    background-color: rgba(88, 166, 255, 0.1);
+}
+</style>
+{% endblock %}
