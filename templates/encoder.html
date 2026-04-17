@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm bg-dark border-secondary">
+            <div class="card-header border-secondary p-3">
+                <h5 class="card-title mb-0"><i class="fas fa-code me-2 text-warning"></i>Encoder/Decoder Tool</h5>
+            </div>
+            <div class="card-body text-light">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <textarea id="codec-input" class="form-control pentest-input" rows="5" placeholder="Enter text here..."></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button onclick="handleCodec('b64-enc')" class="btn btn-outline-warning">Base64 Encode</button>
+                        <button onclick="handleCodec('b64-dec')" class="btn btn-outline-warning">Base64 Decode</button>
+                        <button onclick="handleCodec('url-enc')" class="btn btn-outline-warning">URL Encode</button>
+                        <button onclick="handleCodec('url-dec')" class="btn btn-outline-warning">URL Decode</button>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="position-relative">
+                            <textarea id="codec-output" class="form-control bg-black text-warning border-secondary" rows="5" readonly placeholder="Result will appear here..."></textarea>
+                            <button class="btn btn-sm btn-outline-warning position-absolute top-0 end-0 m-2" onclick="copyToClipboard('codec-output')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pentest-input {
+        background-color: #ced4da !important;
+        color: #000000 !important;
+        border: 1px solid #adb5bd !important;
+    }
+    .pentest-input::placeholder {
+        color: #495057 !important;
+        opacity: 0.8;
+    }
+    .pentest-input:focus {
+        background-color: #e9ecef !important;
+        color: #000000 !important;
+        box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25) !important;
+    }
+</style>
+{% endblock %}

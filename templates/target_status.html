@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm bg-dark border-secondary">
+            <div class="card-header border-secondary p-3">
+                <h5 class="card-title mb-0"><i class="fas fa-satellite-dish me-2 text-danger"></i>Target Status Checker</h5>
+            </div>
+            <div class="card-body text-light">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="small opacity-75 mb-1">Target IP or Hostname</label>
+                        <input type="text" id="target-ip" class="form-control pentest-input" placeholder="e.g. 192.168.1.1">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="small opacity-75 mb-1">Port</label>
+                        <input type="text" id="target-port" class="form-control pentest-input" placeholder="Port" value="80">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button onclick="checkStatus()" id="check-btn" class="btn btn-danger w-100">Check Status</button>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <h6 class="border-bottom border-secondary pb-2 mb-3">Scan Results</h6>
+                        <div id="status-results" class="list-group list-group-flush">
+                            <p class="text-center opacity-50 py-3">No targets checked yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pentest-input {
+        background-color: #ced4da !important;
+        color: #000000 !important;
+        border: 1px solid #adb5bd !important;
+    }
+    .pentest-input:focus {
+        background-color: #e9ecef !important;
+        color: #000000 !important;
+    }
+</style>
+{% endblock %}

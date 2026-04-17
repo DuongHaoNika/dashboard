@@ -58,6 +58,9 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark border-secondary shadow" aria-labelledby="toolsDropdown">
                         <li><a class="dropdown-item py-2" href="{{ url_for('scan') }}"><i class="fas fa-search me-2 text-warning"></i> Subdomain Scan</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('revshell') }}"><i class="fas fa-terminal me-2 text-info"></i> Reverse Shell</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('encoder') }}"><i class="fas fa-code me-2 text-warning"></i> Encoder/Decoder</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('target_status') }}"><i class="fas fa-satellite-dish me-2 text-danger"></i> Target Status</a></li>
                         <li><a class="dropdown-item py-2" href="{{ url_for('request_tool') }}"><i class="fas fa-exchange-alt me-2 text-success"></i> Request Tool</a></li>
                         <li><a class="dropdown-item py-2" href="{{ url_for('cve') }}"><i class="fas fa-shield-virus me-2 text-danger"></i> Latest CVEs</a></li>
                         <li><a class="dropdown-item py-2" href="{{ url_for('cve_lookup') }}"><i class="fas fa-search-plus me-2 text-info"></i> Lookup CVE</a></li>

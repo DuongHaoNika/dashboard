@@ -134,6 +134,21 @@ def change_password():
             
     return render_template('change_password.html')
 
+@app.route('/revshell')
+@login_required
+def revshell():
+    return render_template('revshell.html')
+
+@app.route('/encoder')
+@login_required
+def encoder():
+    return render_template('encoder.html')
+
+@app.route('/target_status')
+@login_required
+def target_status():
+    return render_template('target_status.html')
+
 @app.route('/scan', methods=['GET', 'POST'])
 @login_required
 def scan():

