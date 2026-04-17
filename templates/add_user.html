@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm bg-dark border-secondary">
+            <div class="card-header border-secondary p-3">
+                <h5 class="card-title mb-0"><i class="fas fa-user-plus me-2 text-success"></i>Add New User</h5>
+            </div>
+            <div class="card-body text-light">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="small opacity-75 mb-1">Username</label>
+                        <input type="text" name="username" class="form-control pentest-input" placeholder="Enter username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small opacity-75 mb-1">Password</label>
+                        <input type="password" name="password" class="form-control pentest-input" placeholder="Enter password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small opacity-75 mb-1">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control pentest-input" placeholder="Confirm password" required>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success">Create User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pentest-input {
+        background-color: #ced4da !important;
+        color: #000000 !important;
+        border: 1px solid #adb5bd !important;
+    }
+    .pentest-input:focus {
+        background-color: #e9ecef !important;
+        color: #000000 !important;
+    }
+</style>
+{% endblock %}

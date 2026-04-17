@@ -109,6 +109,61 @@ def get_stats():
     }
     return jsonify(stats)
 
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+def add_user():
+    if current_user.username != 'haodq':
+        flash('Permission denied. Only haodq can manage users.', 'error')
+        return redirect(url_for('index'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not username or not password:
+            flash('Username and password are required', 'error')
+        elif password != confirm_password:
+            flash('Passwords do not match', 'error')
+        elif users_collection.find_one({"username": username}):
+            flash('Username already exists', 'error')
+        else:
+            hashed_password = generate_password_hash(password)
+            users_collection.insert_one({
+                "username": username,
+                "password": hashed_password,
+                "created_at": datetime.now(timezone.utc)
+            })
+            flash(f'User {username} created successfully', 'success')
+            return redirect(url_for('users'))
+            
+    return render_template('add_user.html')
+
+@app.route('/users')
+@login_required
+def users():
+    if current_user.username != 'haodq':
+        flash('Permission denied. Only haodq can manage users.', 'error')
+        return redirect(url_for('index'))
+        
+    all_users = list(users_collection.find())
+    return render_template('users.html', users=all_users)
+
+@app.route('/delete_user/<user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if current_user.username != 'haodq':
+        flash('Permission denied.', 'error')
+        return redirect(url_for('index'))
+        
+    if str(current_user.id) == user_id:
+        flash('You cannot delete yourself', 'error')
+        return redirect(url_for('users'))
+    
+    users_collection.delete_one({"_id": ObjectId(user_id)})
+    flash('User deleted successfully', 'success')
+    return redirect(url_for('users'))
+
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():

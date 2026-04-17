@@ -64,6 +64,10 @@
                         <li><a class="dropdown-item py-2" href="{{ url_for('request_tool') }}"><i class="fas fa-exchange-alt me-2 text-success"></i> Request Tool</a></li>
                         <li><a class="dropdown-item py-2" href="{{ url_for('cve') }}"><i class="fas fa-shield-virus me-2 text-danger"></i> Latest CVEs</a></li>
                         <li><a class="dropdown-item py-2" href="{{ url_for('cve_lookup') }}"><i class="fas fa-search-plus me-2 text-info"></i> Lookup CVE</a></li>
+                        {% if current_user.username == 'haodq' %}
+                        <li><hr class="dropdown-divider border-secondary"></li>
+                        <li><a class="dropdown-item py-2" href="{{ url_for('users') }}"><i class="fas fa-users-cog me-2 text-info"></i> User Management</a></li>
+                        {% endif %}
                         <li><hr class="dropdown-divider border-secondary"></li>
                         <li><a class="dropdown-item py-2" href="{{ url_for('change_password') }}"><i class="fas fa-key me-2 text-info"></i> Change Password</a></li>
                     </ul>
